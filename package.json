@@ -1,0 +1,9 @@
+{
+  "name": "trpg-minitest",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "test": "node tests/game-engine.test.js",
+    "start": "python -m http.server 8010 --bind 127.0.0.1"
+  }
+}

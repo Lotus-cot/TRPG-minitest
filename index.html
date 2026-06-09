@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>TRPG Minitest · The Dead</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="snow" aria-hidden="true"></div>
+    <header class="masthead">
+      <div>
+        <p class="kicker">TRPG MINITEST · PLAYER KNOWLEDGE PROTOTYPE</p>
+        <h1>The room, the song,<br /><em>and what you cannot know.</em></h1>
+      </div>
+      <div class="role-card">
+        <span>你扮演</span>
+        <strong>Gabriel Conroy</strong>
+        <p>调查提高理解，心理预演降低盲目，但每个真实行动都会留下后果。</p>
+      </div>
+    </header>
+
+    <main>
+      <section class="scene-panel">
+        <div class="scene-copy">
+          <p id="sceneEyebrow" class="kicker"></p>
+          <h2 id="sceneTitle"></h2>
+          <p id="sceneDescription"></p>
+        </div>
+        <div class="resources">
+          <div><span>行动机会</span><strong id="turnsLeft"></strong></div>
+          <div><span>心理预演</span><strong id="simulationsLeft"></strong></div>
+          <button id="advanceButton" type="button">结束本幕</button>
+        </div>
+      </section>
+
+      <section class="metric-strip" id="metrics"></section>
+
+      <div class="play-grid">
+        <section class="actions-panel">
+          <div class="section-title">
+            <div>
+              <p class="kicker">ACTIONS</p>
+              <h2>你准备怎样靠近真相？</h2>
+            </div>
+            <div class="action-tabs">
+              <button class="tab active" data-action-filter="all">全部</button>
+              <button class="tab" data-action-filter="investigate">调查</button>
+              <button class="tab" data-action-filter="emotion">情感</button>
+            </div>
+          </div>
+          <div id="actionList" class="action-list"></div>
+        </section>
+
+        <aside class="prediction-panel">
+          <p class="kicker">MENTAL REHEARSAL</p>
+          <h2>心理预演</h2>
+          <div id="prediction">
+            <p>在真正行动前，你可以消耗一次预演，依据已知线索推测可能后果。</p>
+            <p class="muted">预演并非读取未来。线索越充分，预测越可靠。</p>
+          </div>
+        </aside>
+      </div>
+
+      <section class="knowledge-panel">
+        <div class="section-title">
+          <div>
+            <p class="kicker">PLAYER KNOWLEDGE GRAPH</p>
+            <h2>Gabriel 当前理解的世界</h2>
+          </div>
+          <div class="knowledge-controls">
+            <span id="selectionHint">选择两条线索建立推论</span>
+            <button id="connectButton" type="button" disabled>关联线索</button>
+          </div>
+        </div>
+        <div class="knowledge-grid">
+          <div id="graph" class="graph"></div>
+          <div>
+            <h3>已知线索与推论</h3>
+            <div id="clueList" class="clue-list"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="journal-panel">
+        <div>
+          <p class="kicker">JOURNAL</p>
+          <h2>行动留下的痕迹</h2>
+        </div>
+        <ol id="journal"></ol>
+      </section>
+    </main>
+
+    <dialog id="endingDialog">
+      <p class="kicker">ENDING</p>
+      <h2 id="endingTitle"></h2>
+      <p id="endingText"></p>
+      <div id="endingMetrics"></div>
+      <button id="restartButton" type="button">重新开始</button>
+    </dialog>
+
+    <script src="game-data.js"></script>
+    <script src="game-engine.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
