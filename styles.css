@@ -201,11 +201,21 @@ button:disabled { border-color: var(--line); background: #d4d0c7; color: #817d74
 .confidence strong { color: #d7b976; font-size: 40px; font-weight: 400; }
 
 .knowledge-panel, .journal-panel { margin-top: 18px; }
-.knowledge-controls { display: flex; align-items: center; gap: 12px; color: var(--muted); font-size: 12px; }
+.knowledge-controls { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; color: var(--muted); font-size: 12px; }
+.knowledge-controls label { display: flex; align-items: center; gap: 7px; }
+.knowledge-controls select {
+  max-width: 180px;
+  padding: 8px 28px 8px 10px;
+  border: 1px solid var(--line);
+  background: var(--paper-light);
+  color: var(--ink);
+  font: inherit;
+}
 .knowledge-grid { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(320px, .55fr); gap: 20px; }
 
 .graph {
-  min-height: 500px;
+  min-height: 240px;
+  overflow: auto;
   border: 1px solid var(--line);
   background:
     linear-gradient(rgba(25,38,42,.045) 1px, transparent 1px),
@@ -214,19 +224,37 @@ button:disabled { border-color: var(--line); background: #d4d0c7; color: #817d74
   background-size: 28px 28px;
 }
 
-.graph svg { display: block; width: 100%; height: 500px; }
-.graph line { stroke: rgba(35,79,91,.35); stroke-width: 1.4; }
-.graph line.hypothesis { stroke: var(--red); stroke-dasharray: 5 4; }
+.graph svg { display: block; width: 1040px; height: auto; min-height: 240px; }
+.graph path { fill: none; stroke: rgba(35,79,91,.4); stroke-width: 1.5; }
+.graph path.hypothesis { stroke: var(--red); stroke-dasharray: 5 4; }
+.graph-divider { stroke: rgba(25,38,42,.1); stroke-dasharray: 2 6; }
 .graph-node circle { fill: var(--gold); stroke: #fff; stroke-width: 3; filter: drop-shadow(0 3px 3px rgba(0,0,0,.18)); }
 .graph-node.character circle { fill: var(--blue); }
-.graph-node.hypothesis circle { fill: var(--red); }
-.graph-node text { fill: var(--ink); font-size: 11px; font-weight: 700; paint-order: stroke; stroke: var(--paper-light); stroke-width: 4px; }
+.graph-node text { fill: var(--ink); font-size: 13px; font-weight: 700; paint-order: stroke; stroke: var(--paper-light); stroke-width: 5px; }
+.graph-info-card { cursor: pointer; }
+.graph-info-card rect {
+  fill: rgba(250,247,239,.98);
+  stroke: rgba(35,79,91,.38);
+  stroke-width: 1.2;
+  filter: drop-shadow(0 4px 5px rgba(25,38,42,.12));
+  transition: transform .16s ease, stroke .16s ease;
+}
+.graph-info-card:hover rect { stroke: var(--blue); stroke-width: 2; transform: translateY(-2px); }
+.graph-info-card.hypothesis rect { fill: #f4e8e2; stroke: rgba(143,63,52,.56); }
+.graph-card-type { fill: var(--muted); font-family: Consolas, monospace; font-size: 9px; letter-spacing: .08em; }
+.graph-card-title { fill: var(--ink); font-size: 12px; font-weight: 700; }
+.graph-info-card.hypothesis .graph-card-type { fill: var(--red); }
+.graph-empty-label { fill: var(--muted); font-size: 14px; font-style: italic; }
 
 .clue-list { display: grid; gap: 8px; max-height: 500px; overflow: auto; }
 .clue, .hypothesis { width: 100%; padding: 13px; border: 1px solid var(--line); background: rgba(255,255,255,.38); color: var(--ink); text-align: left; }
 .clue strong, .hypothesis strong { display: block; margin: 5px 0; }
 .clue p, .hypothesis p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
 .clue.selected { outline: 3px solid rgba(175,132,60,.45); transform: translateX(-4px); }
+.clue.graph-highlight, .hypothesis.graph-highlight {
+  outline: 3px solid rgba(35,79,91,.4);
+  background: rgba(255,255,255,.9);
+}
 .hypothesis { border-left: 5px solid var(--red); }
 .empty { color: var(--muted); font-style: italic; }
 
