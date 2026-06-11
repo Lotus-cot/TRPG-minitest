@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "test": "node tests/game-engine.test.js",
-    "start": "python -m http.server 8010 --bind 127.0.0.1"
+    "start": "python -m http.server 8010 --bind 127.0.0.1",
+    "import:world-status": "node scripts/import-world-status.mjs"
   }
 }

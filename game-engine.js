@@ -13,7 +13,7 @@ window.GameEngine = class GameEngine {
       clues: [],
       hypotheses: [],
       actionHistory: [],
-      journal: ["晚宴开始。你扮演 Gabriel，所见未必等于世界的全部真相。"],
+      journal: ["晚宴开始。你扮演 Gabriel；World Status 提供世界事实，但你只能依据已知线索行动。"],
       selectedClues: [],
       ended: false,
       ending: null,
@@ -137,6 +137,9 @@ window.GameEngine = class GameEngine {
     if (this.state.ended) return { ok: false, message: "故事已经结束。" };
     const npcLine = this.state.metrics.tension >= 48 ? this.scene.npc.tense : this.scene.npc.calm;
     this.state.journal.unshift(`人物行动：${npcLine}`);
+    if (this.scene.briefing?.nextHook) {
+      this.state.journal.unshift(`幕间悬念：${this.scene.briefing.nextHook}`);
+    }
 
     if (this.state.sceneIndex >= this.data.scenes.length - 1) {
       this.finish();

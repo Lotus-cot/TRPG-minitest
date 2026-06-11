@@ -1,13 +1,18 @@
 const assert = require("assert");
 
 global.window = {};
+require("../world-status-runtime.js");
 require("../game-data.js");
 require("../game-engine.js");
 
 const engine = new window.GameEngine(window.GAME_DATA);
 
-assert.strictEqual(engine.scene.id, "party");
-assert.strictEqual(engine.state.turnsLeft, 4);
+assert.strictEqual(window.WORLD_STATUS_DATA.acts.length, 5);
+assert.strictEqual(window.WORLD_STATUS_DATA.characters.length, 11);
+assert.strictEqual(engine.data.scenes.length, 5);
+assert.strictEqual(engine.scene.id, "reception");
+assert.strictEqual(engine.scene.briefing.sourceClueCount, 2);
+assert.strictEqual(engine.state.turnsLeft, 3);
 
 const beforeSimulation = engine.snapshot();
 const simulation = engine.simulate("observe_lily");
@@ -17,9 +22,12 @@ assert.strictEqual(engine.state.simulationsLeft, 1);
 
 assert.strictEqual(engine.commit("observe_lily").ok, true);
 assert.ok(engine.state.clues.includes("lily_retort"));
-assert.strictEqual(engine.state.turnsLeft, 3);
+assert.strictEqual(engine.state.turnsLeft, 2);
 assert.strictEqual(engine.commit("observe_lily").ok, false);
+engine.commit("inspect_speech_notes");
 
+engine.advanceScene();
+assert.strictEqual(engine.scene.id, "dance");
 engine.commit("ask_ivors");
 engine.selectClue("lily_retort");
 engine.selectClue("ivors_conflict");
@@ -28,7 +36,14 @@ assert.strictEqual(inference.ok, true);
 assert.strictEqual(inference.hypothesis.id, "self_hypothesis");
 
 engine.advanceScene();
-assert.strictEqual(engine.scene.id, "departure");
+assert.strictEqual(engine.scene.id, "speech");
+engine.commit("read_applause");
+engine.selectClue("speech_notes");
+engine.selectClue("applause_distance");
+assert.strictEqual(engine.connectSelectedClues().hypothesis.id, "speech_hypothesis");
+
+engine.advanceScene();
+assert.strictEqual(engine.scene.id, "farewell");
 engine.commit("observe_gretta");
 engine.commit("identify_song");
 engine.selectClue("gretta_reaction");
@@ -36,7 +51,7 @@ engine.selectClue("old_song");
 assert.strictEqual(engine.connectSelectedClues().hypothesis.id, "song_hypothesis");
 
 engine.advanceScene();
-assert.strictEqual(engine.scene.id, "hotel");
+assert.strictEqual(engine.scene.id, "revelation");
 assert.strictEqual(engine.commit("ask_michael_gently").ok, true);
 engine.commit("offer_silence");
 engine.commit("look_at_snow");
@@ -51,12 +66,14 @@ console.log(`Game flow passed with ending: ${engine.state.ending.title}`);
 
 const distanceEngine = new window.GameEngine(window.GAME_DATA);
 distanceEngine.commit("tip_lily");
-distanceEngine.commit("debate_ivors");
+distanceEngine.advanceScene();
+distanceEngine.commit("defend_press");
+distanceEngine.advanceScene();
+distanceEngine.commit("jab_ivors");
 distanceEngine.advanceScene();
 distanceEngine.commit("observe_gretta");
 distanceEngine.commit("identify_song");
 distanceEngine.commit("ask_about_song");
-distanceEngine.commit("press_on_stairs");
 distanceEngine.advanceScene();
 distanceEngine.commit("compare_love");
 distanceEngine.advanceScene();
