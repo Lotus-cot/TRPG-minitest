@@ -7,6 +7,8 @@ const elements = {
   sceneEyebrow: $("#sceneEyebrow"),
   sceneTitle: $("#sceneTitle"),
   sceneDescription: $("#sceneDescription"),
+  actRail: $("#actRail"),
+  sceneBriefing: $("#sceneBriefing"),
   turnsLeft: $("#turnsLeft"),
   simulationsLeft: $("#simulationsLeft"),
   advanceButton: $("#advanceButton"),
@@ -53,6 +55,35 @@ function renderScene() {
     ? "结束故事"
     : "结束本幕";
   elements.advanceButton.disabled = engine.state.ended;
+  renderActRail();
+  renderSceneBriefing(scene);
+}
+
+function renderActRail() {
+  elements.actRail.replaceChildren();
+  engine.data.scenes.forEach((scene, index) => {
+    const step = document.createElement("div");
+    const state = index < engine.state.sceneIndex ? "complete" : index === engine.state.sceneIndex ? "current" : "future";
+    step.className = `act-step ${state}`;
+    step.innerHTML = `
+      <span>${String(index + 1).padStart(2, "0")}</span>
+      <strong>${scene.title}</strong>
+    `;
+    elements.actRail.appendChild(step);
+  });
+}
+
+function renderSceneBriefing(scene) {
+  const briefing = scene.briefing ?? {};
+  const cards = [
+    ["当前状态", briefing.opening],
+    ["本幕目标", briefing.objective],
+    ["核心冲突", briefing.conflict],
+    ["在场人物", briefing.participants?.join(" · ")],
+  ].filter(([, value]) => value);
+  elements.sceneBriefing.innerHTML = cards
+    .map(([label, value]) => `<article><span>${label}</span><p>${value}</p></article>`)
+    .join("");
 }
 
 function renderMetrics() {
@@ -115,9 +146,10 @@ function renderPrediction(result = null) {
 }
 
 function knownCharacterIds() {
-  const ids = new Set(["gabriel", "gretta", "lily", "ivors"]);
-  if (engine.state.clues.includes("michael_name")) ids.add("michael");
-  return ids;
+  return new Set(engine.data.characters
+    .filter((character) => character.introducedIn <= engine.state.sceneIndex)
+    .filter((character) => !character.unlockClue || engine.state.clues.includes(character.unlockClue))
+    .map((character) => character.id));
 }
 
 function renderKnowledge() {
@@ -180,7 +212,7 @@ function renderGraph() {
   const visibleCharacterIds = new Set(items.map((item) => item.character));
   if (graphFocus !== "recent" && graphFocus !== "all") visibleCharacterIds.add(graphFocus);
   const knownCharacters = engine.data.characters.filter(
-    (character) => knownIds.has(character.id) && (graphFocus === "all" || visibleCharacterIds.has(character.id))
+    (character) => knownIds.has(character.id) && visibleCharacterIds.has(character.id)
   );
   const clusters = knownCharacters.map((character) => ({
     character,
@@ -350,6 +382,13 @@ elements.restartButton.addEventListener("click", () => {
   engine.reset();
   renderPrediction();
   render();
+});
+
+engine.data.characters.forEach((character) => {
+  const option = document.createElement("option");
+  option.value = character.id;
+  option.textContent = character.name;
+  elements.graphFocus.insertBefore(option, elements.graphFocus.lastElementChild);
 });
 
 renderPrediction();

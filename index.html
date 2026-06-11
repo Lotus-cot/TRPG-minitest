@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>TRPG Minitest · The Dead</title>
+    <link rel="icon" href="data:," />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -21,6 +22,8 @@
     </header>
 
     <main>
+      <section id="actRail" class="act-rail" aria-label="五幕进度"></section>
+
       <section class="scene-panel">
         <div class="scene-copy">
           <p id="sceneEyebrow" class="kicker"></p>
@@ -33,6 +36,8 @@
           <button id="advanceButton" type="button">结束本幕</button>
         </div>
       </section>
+
+      <section id="sceneBriefing" class="scene-briefing" aria-label="本幕简报"></section>
 
       <section class="metric-strip" id="metrics"></section>
 
@@ -73,11 +78,6 @@
               图谱焦点
               <select id="graphFocus">
                 <option value="recent">最近发现</option>
-                <option value="gabriel">Gabriel</option>
-                <option value="gretta">Gretta</option>
-                <option value="lily">Lily</option>
-                <option value="ivors">Miss Ivors</option>
-                <option value="michael">Michael / 未知青年</option>
                 <option value="all">全部知识</option>
               </select>
             </label>
@@ -111,6 +111,7 @@
       <button id="restartButton" type="button">重新开始</button>
     </dialog>
 
+    <script src="world-status-runtime.js"></script>
     <script src="game-data.js"></script>
     <script src="game-engine.js"></script>
     <script src="app.js"></script>
