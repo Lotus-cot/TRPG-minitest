@@ -160,8 +160,6 @@ function renderKnowledge() {
 
 function renderGraph() {
   elements.graph.replaceChildren();
-  const width = 1040;
-  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   const knownIds = knownCharacterIds();
   let clues = engine.state.clues.map((id) => ({ id, ...engine.data.clues[id] }));
   let hypotheses = engine.state.hypotheses.map((id) => ({
@@ -184,99 +182,97 @@ function renderGraph() {
   const knownCharacters = engine.data.characters.filter(
     (character) => knownIds.has(character.id) && (graphFocus === "all" || visibleCharacterIds.has(character.id))
   );
-  const rows = knownCharacters.map((character) => ({
+  const clusters = knownCharacters.map((character) => ({
     character,
     items: items.filter((item) => item.character === character.id),
   }));
-  const rowHeights = rows.map((row) => Math.max(132, Math.ceil(Math.max(1, row.items.length) / 3) * 88 + 38));
-  const height = Math.max(240, rowHeights.reduce((total, value) => total + value, 0) + 30);
-  svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
 
-  let yOffset = 22;
-  rows.forEach((row, rowIndex) => {
-    const rowHeight = rowHeights[rowIndex];
-    const characterY = yOffset + rowHeight / 2;
-    const divider = document.createElementNS("http://www.w3.org/2000/svg", "line");
-    divider.setAttribute("x1", "24");
-    divider.setAttribute("x2", String(width - 24));
-    divider.setAttribute("y1", String(yOffset + rowHeight));
-    divider.setAttribute("y2", String(yOffset + rowHeight));
-    divider.setAttribute("class", "graph-divider");
-    svg.appendChild(divider);
+  const map = document.createElement("div");
+  map.className = "knowledge-map";
 
-    row.items.forEach((item, itemIndex) => {
-      const column = itemIndex % 3;
-      const line = Math.floor(itemIndex / 3);
-      const itemX = 300 + column * 235;
-      const itemY = yOffset + 42 + line * 88;
-      const edge = document.createElementNS("http://www.w3.org/2000/svg", "path");
-      edge.setAttribute("d", `M 156 ${characterY} C 205 ${characterY}, 220 ${itemY}, ${itemX - 90} ${itemY}`);
-      edge.setAttribute("class", item.kind);
-      svg.appendChild(edge);
-      drawInfoCard(svg, item, itemX, itemY);
-    });
+  const overview = document.createElement("div");
+  overview.className = "graph-overview";
+  overview.innerHTML = `
+    <div>
+      <span>当前视图</span>
+      <strong>${elements.graphFocus.selectedOptions[0]?.textContent || "最近发现"}</strong>
+    </div>
+    <div>
+      <span>可见人物</span>
+      <strong>${clusters.length}</strong>
+    </div>
+    <div>
+      <span>线索</span>
+      <strong>${clues.length}</strong>
+    </div>
+    <div>
+      <span>推论</span>
+      <strong>${hypotheses.length}</strong>
+    </div>
+  `;
+  map.appendChild(overview);
 
-    drawCharacterNode(svg, row.character, 105, characterY);
-    yOffset += rowHeight;
-  });
-
-  if (!rows.length || !items.length) {
-    const empty = document.createElementNS("http://www.w3.org/2000/svg", "text");
-    empty.setAttribute("x", String(width / 2));
-    empty.setAttribute("y", String(height / 2));
-    empty.setAttribute("text-anchor", "middle");
-    empty.setAttribute("class", "graph-empty-label");
-    empty.textContent = graphFocus === "recent" ? "采取行动后，最近发现会显示在这里。" : "这个人物尚无已知线索。";
-    svg.appendChild(empty);
+  if (!clusters.length || !items.length) {
+    const empty = document.createElement("div");
+    empty.className = "graph-empty-state";
+    empty.innerHTML = `
+      <span>尚无记录</span>
+      <strong>${graphFocus === "recent" ? "采取行动后，最近发现会显示在这里。" : "这个人物尚无已知线索。"}</strong>
+      <p>调查、交流和线索关联都会逐步补全 Gabriel 对世界的理解。</p>
+    `;
+    map.appendChild(empty);
+    elements.graph.appendChild(map);
+    return;
   }
 
-  elements.graph.appendChild(svg);
+  clusters.forEach(({ character, items: characterItems }, clusterIndex) => {
+    const cluster = document.createElement("section");
+    cluster.className = "knowledge-cluster";
+    cluster.style.setProperty("--cluster-index", clusterIndex);
+
+    const identity = document.createElement("header");
+    identity.className = "cluster-identity";
+    identity.innerHTML = `
+      <div class="character-sigil">${character.name.slice(0, 1)}</div>
+      <div>
+        <span>${character.role}</span>
+        <h3>${character.name}</h3>
+        <p>${character.note}</p>
+      </div>
+      <strong>${characterItems.length}</strong>
+    `;
+    cluster.appendChild(identity);
+
+    const track = document.createElement("div");
+    track.className = "cluster-track";
+    characterItems.forEach((item, itemIndex) => {
+      track.appendChild(createKnowledgeMapCard(item, itemIndex));
+    });
+    cluster.appendChild(track);
+    map.appendChild(cluster);
+  });
+
+  elements.graph.appendChild(map);
 }
 
-function drawCharacterNode(svg, character, x, y) {
-  const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
-  group.setAttribute("class", "graph-node character");
-  group.setAttribute("transform", `translate(${x} ${y})`);
-  const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-  circle.setAttribute("r", "31");
-  const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
-  label.setAttribute("y", "52");
-  label.setAttribute("text-anchor", "middle");
-  label.textContent = character.name;
-  group.append(circle, label);
-  svg.appendChild(group);
-}
-
-function drawInfoCard(svg, item, x, y) {
-  const width = 190;
-  const height = 58;
-  const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
-  group.setAttribute("class", `graph-info-card ${item.kind}`);
-  group.setAttribute("transform", `translate(${x - width / 2} ${y - height / 2})`);
-  const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-  rect.setAttribute("width", String(width));
-  rect.setAttribute("height", String(height));
-  rect.setAttribute("rx", "8");
-  const type = document.createElementNS("http://www.w3.org/2000/svg", "text");
-  type.setAttribute("x", "12");
-  type.setAttribute("y", "17");
-  type.setAttribute("class", "graph-card-type");
-  type.textContent = item.kind === "hypothesis" ? "玩家推论" : "已知线索";
-  const title = document.createElementNS("http://www.w3.org/2000/svg", "text");
-  title.setAttribute("x", "12");
-  title.setAttribute("y", "38");
-  title.setAttribute("class", "graph-card-title");
-  title.textContent = item.title.length > 15 ? `${item.title.slice(0, 14)}…` : item.title;
-  const tooltip = document.createElementNS("http://www.w3.org/2000/svg", "title");
-  tooltip.textContent = `${item.title}\n${item.text}`;
-  group.append(rect, type, title, tooltip);
-  group.addEventListener("click", () => {
+function createKnowledgeMapCard(item, itemIndex) {
+  const card = document.createElement("button");
+  card.type = "button";
+  card.className = `map-card ${item.kind}`;
+  card.style.setProperty("--item-index", itemIndex);
+  card.innerHTML = `
+    <span>${item.kind === "hypothesis" ? "玩家推论" : "已知线索"}</span>
+    <strong>${item.title}</strong>
+    <p>${item.text}</p>
+    <i aria-hidden="true">${String(itemIndex + 1).padStart(2, "0")}</i>
+  `;
+  card.addEventListener("click", () => {
     const clue = elements.clueList.querySelector(`[data-knowledge-id="${item.id}"]`);
     clue?.scrollIntoView({ behavior: "smooth", block: "nearest" });
     clue?.classList.add("graph-highlight");
     window.setTimeout(() => clue?.classList.remove("graph-highlight"), 1400);
   });
-  svg.appendChild(group);
+  return card;
 }
 
 function renderJournal() {
